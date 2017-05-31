@@ -1,0 +1,261 @@
+<DOCTYPE html>
+    <html ng-app="app">
+
+    <head>
+        <title>Package Template Generator</title>
+        <link rel="stylesheet" type="text/css" href="main.css">
+	<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular.min.js"></script>
+        <script type="text/javascript">
+
+        	var app = angular.module("app",[]);
+	
+			app.controller('formController', function($scope, $http) {
+
+				$scope.form = {};
+				$scope.output = "";
+    			//$scope.dom = '123';
+			    $scope.organization = {
+			        message: ""
+			    };
+				console.log($scope.organization.message);
+
+				$scope.submit = function() {
+					$http({
+						method: 'POST',
+						url: '/',
+						data: $scope.form,
+						headers: {
+							'Content-Type': 'application/json'
+						}
+					}).then(function successCallback(response) {
+							
+							$scope.output =response.data.output; 
+							pret = angular.element(document.querySelector('#output'));
+							pret.html($scope.output);
+
+                        });
+
+				};
+			
+
+				 		
+				$scope.delForm = function(name) {
+					delete $scope.form[name];
+				};
+
+			});		
+				
+			app.controller('Note', function($scope) {
+				$scope.items = [];
+                $scope.add = function() {
+                    $scope.items.push({
+                        text: "",
+                    });
+                };
+                $scope.del = function(i) {
+                    if (i >= 0) {
+                        $scope.items.splice(i, 1);
+
+                    }
+                };				
+			});
+        </script>
+
+    </head>
+    </style>
+
+    <body>
+
+        <h1>Package Builder</h1>
+        <div>
+            <form ng-controller="formController" ng-submit="submit()">
+  
+		  		<div style="float:left" class="textInput">
+					<label for="packName">Package Name:</label>
+	                <input id="packName" ng-model="form.packName" type="text">
+					<label for="softwareVer">Software Version:</label>
+	                <input id="softwareVer" ng-model="form.softwareVer" type="text">
+		  			<label for="author">Package Author:</label>
+	                <input id="author" ng-model="form.author" type="text">
+
+				</div>
+				<center>
+				<div style="float:left">
+					<label for="comment">Comments:</label>
+				   	<textarea id="comments" ng-model="form.comments" rows="10" cols="30"></textarea>
+				</div>
+            	</center>
+            	
+
+                <select ng-model="form.mode">
+			<option value="Development">Development</option>
+			<option value="Production">Production</option>
+		</select><br><br>
+
+                <h2>Allowed Regs</h2>
+                <table>
+                    <tr>
+                        <th>
+                            <input id="clc" ng-model="form.clc" type="checkbox" name="clc" value=1/>
+                            <label for="clc">CLC</label>
+                        </th>
+                        <th>
+                            <input id="desktop" ng-model="form.desktop" type="checkbox" name="desktop" value=1/>
+                            <label for="desktop">Desktop</label>
+                        </th>
+                        <th>
+                            <input id="traveling" ng-model="form.traveling" type="checkbox" name="traveling" value=1/>
+                            <label for="traveling">Traveling</label>
+                        </th>
+                        <th>
+                            <input id="vClc" ng-model="form.vClc" type="checkbox" name="vClc" value=1/>
+                            <label for="vClc">Virtual CLC</label>
+                        </th>
+                    </tr>
+                </table>
+
+                <h2>Allowed Architecture</h2>
+                <table>
+                    <tr>
+                        <th>
+                            <input id="arch32" ng-model="form.arch32" type="checkbox" name="arch32" value=1/>
+                            <label for="arch32">32-Bit</label>
+                        </th>
+                        <th>
+                            <input id="arch64" ng-model="form.arch64" type="checkbox" name="arch64" value=1/>
+                            <label for="arch64">64-Bit</label>
+                        </th>
+                    </tr>
+                </table>
+
+                <h2>Allowed Versions</h2>
+                <table>
+                    <tr>
+                        <th>
+                            <input id="xp32" ng-model="form.xp32" type="checkbox" name="xp32" value=1/>
+                            <label for="xp32">Windows XP 32</label>
+                        </th>
+                        <th>
+                            <input id="vista_0" ng-model="form.vista_0" type="checkbox" name="vista_0" value=1/>
+                            <label for="vista_0">Windows Vista SP0</label>
+                        </th>
+                        <th>
+                            <input id="vista_1" ng-model="form.vista_1" type="checkbox" name="vista_1" value=1/>
+                            <label for="vista_1">Windows Vista SP1</label>
+                        </th>
+                        <th>
+                            <input id="vista_2" ng-model="form.vista_2" type="checkbox" name="vista_2" value=1/>
+                            <label for="vista_2">Windows Vista SP2</label>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>
+                            <input id="win7_0" ng-model="form.win7_0" type="checkbox" name="win7_0" value=1/>
+                            <label for="win7_0">Windows 7 SP0</label>
+                        </th>
+                        <th>
+                            <input id="win7_1" ng-model="form.win7_1" type="checkbox" name="win7_1" value=1/>
+                            <label for="win7_1">Windows 7 SP1</label>
+                        </th>
+                        <th>
+                            <input id="win8" ng-model="form.win8" type="checkbox" name="win8" value=1/>
+                            <label for="win8">Windows 8</label>
+                        </th>
+                        <th>
+                            <input id="win10_0" ng-model="form.win10_0" type="checkbox" name="win10_0" value=1/>
+                            <label for="win10_0">Windows 10 SP0</label>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>
+                            <input id="win10_1" ng-model="form.win10_1" type="checkbox" name="win10_1" value=1/>
+                            <label for="win10_1">Windows 10 SP1</label>
+                        </th>
+
+                    </tr>
+                </table>
+
+                <h2>Custom Subs</h2>
+                <table>
+                    <tr>
+
+                        <th>
+                            <input id="help" ng-model="form.help" type="checkbox" ng-click="add()" value=1/>
+                            <label for="help">Help</label>
+                            <div class="commandInput" ng-controller="Note">
+                                <button class="subOptionButton" ng-click="add()">Add Command</button>
+                                <div class="subOption" ng-repeat="item in items">
+                                    <span>
+								<input ng-model="form['helpCmd_'+$index]" type="text"><button ng-click="del($index);delForm('helpCmd_'+$index)">Delete</button>
+							</span>
+                                </div>
+                            </div>
+                        </th>
+                        <th>
+                            <input id="install" ng-model="form.install" type="checkbox" value=1/>
+                            <label for="install">Install</label>
+                            <div class="commandInput" ng-controller="Note">
+                                <button class="subOptionButton" ng-click="add()">Add Command</button>
+                                <div class="subOption" ng-repeat="item in items">
+                                    <span>
+								<input ng-model="form['instCmd_'+$index]" type="text"><button ng-click="del($index);delForm('instCmd_'+$index)">Delete</button>
+							</span>
+                                </div>
+                            </div>
+                        </th>
+                        <th>
+                            <input id="uninstall" ng-model="form.uninstall" type="checkbox" value=1/>
+                            <label for="uninstall">Uninstall</label>
+                            <div class="commandInput" ng-controller="Note">
+                                <button class="subOptionButton" ng-click="add()">Add Command</button>
+                                <div class="subOption" ng-repeat="item in items">
+                                    <span>
+								<input ng-model="form['unCmd_'+$index]" type="text"><button ng-click="del($index);delForm('unCmd_'+$index)">Delete</button>
+							</span>
+                                </div>
+                            </div>
+                        </th>
+                        <th>
+                            <input id="preinstall" ng-model="form.preinstall" type="checkbox" value=1/>
+                            <label for="preinstall">Preinstall</label>
+                            <div class="commandInput" ng-controller="Note">
+                                <button class="subOptionButton" ng-click="add()">Add Command</button>
+                                <div class="subOption" ng-repeat="item in items">
+                                    <span>
+								<input ng-model="form['preCmd_'+$index]" type="text"><button ng-click="del($index);delForm('preCmd_'+$index)">Delete</button>
+							</span>
+                                </div>
+                            </div>
+                        </th>
+
+                        <th>
+                            <input id="postinstall" ng-model="form.postinstall" type="checkbox" value=1/>
+                            <label for="postinstall">Postinstall</label>
+                            <div class="commandInput" ng-controller="Note">
+                                <button class="subOptionButton" ng-click="add()">Add Command</button>
+                                <div class="subOption" ng-repeat="item in items">
+                                    <span>
+								<input ng-model="form['poCmd_'+$index]" type="text"><button ng-click="del($index);delForm('poCmd_'+$index)">Delete</button>
+							</span>
+                                </div>
+                            </div>
+                        </th>
+                    </tr>
+                </table>
+
+                <center>
+                    <input type="submit" class="submit" value="Submit">
+                </center>
+             
+			<pre id="output" class="prettyprint">
+			</pre>
+            </form> 
+
+        </div>
+
+
+    </body>
+
+    </html>
