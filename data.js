@@ -94,6 +94,7 @@ class Template {
         this.header =
             `
 #Package Name: ${this.name}
+#Package ID: ${this.packId}
 #Packaged By: ${this.author}
 #Packaged On: ${this.year}-${this.month}-${this.day}
 #Last Updated: ${this.year}-${this.month}-${this.day}
