@@ -20,185 +20,174 @@
     <!-- Custom Fonts -->
     <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
     <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular.min.js"></script>
-  <script src="http://rawgit.com/danialfarid/ng-file-upload/master/dist/ng-file-upload.min.js"></script>
+    <script src="http://rawgit.com/danialfarid/ng-file-upload/master/dist/ng-file-upload.min.js"></script>
     <script type="text/javascript">
-
-        var app = angular.module("app",['ngFileUpload']);
-
-
-        app.controller('formController', ['$scope','Upload', function($scope, Upload) {
-
-            $scope.form = {};
-            $scope.output = "";
-            $scope.file = null;
+        var app = angular.module("app", ['ngFileUpload']);
 
 
-    // $scope.uploadFiles = function (files) {
-    //   if (files && files.length) {
-    //     for (var i = 0; i < files.length; i++) {
-    //       Upload.upload({..., data: {file: files[i]}, ...})...;
-    //     }
-    //     // or send them all together for HTML5 browsers:
-    //     Upload.upload({..., data: {file: files}, ...})...;
-    //   }
-    // }
+        app.controller('formController', ['$scope', '$sce', 'Upload', function($scope, $sce, Upload) {
+            $scope.alerts = [];
+            
+
+            $scope.resetForm = function(form) {
+
+                angular.copy({}, form);
+
+                $scope.output = "";
+                $scope.file = null;
+
+                $scope.form = {};
+
+                $scope.form.commands = {
+                    help: [],
+                    install: [],
+                    uninstall: [],
+                    preinstall: [],
+                    postinstall: []
+                };
+
+                 $scope.form.subs = {
+                    help: false,
+                    install: false,
+                    uninstall: false,
+                    preinstall: false,
+                    postinstall: false
+                }
+
+ 
+                $scope.form.archs = {
+                    OSARCH_x32: false,
+                    OSARCH_x64: false
+                }
+
+                $scope.form.regs = {
+                    clc : false,
+                    desktop : false,
+                    traveling : false,
+                    virtual_clc : false,
+                    virtual_desktop : false
+                }
+
+                $scope.form.vers = {
+                    OSVER_XP_32 : false,
+                    OSVER_VISTA_SP0 : false,
+                    OSVER_VISTA_SP1 : false,
+                    OSVER_VISTA_SP2 : false,
+                    OSVER_WIN7_SP0 : false,
+                    OSVER_WIN7_SP1 : false,
+                    OSVER_WIN8_SP0 : false,
+                    OSVER_WIN10_SP0 : false,
+                    OSVER_WIN10_SP1 : false
+                }
+
+                $scope.form.packName = "";
+                $scope.form.softwareVer = "";
+                $scope.form.author = "";
+                $scope.form.packId = "";
+                $scope.form.comments = "";
+                $scope.form.mode = '';
+
+            }
+
+
+            $scope.changeMode = function(m) {
+                $scope.form.mode = m;
+            }
+            $scope.getMode = function(){
+                switch ($scope.form.mode){
+                    case 'dev':
+                    return 'Development';
+                    break;
+                    case 'prod':
+                    return 'Production';
+                    break;
+                    default:
+                    return 'Mode';
+                }
+            }
 
             $scope.submit = function() {
-                //$scope.upload($scope.file);
-                console.log($scope.file);
-                  $scope.$watch('file', function() {
+                $scope.$watch('file', function() {
                     var file = $scope.file;
                     if (!file) {
-                      return;
+                        return;
                     }
                 });
                 Upload.upload({
                     method: 'POST',
                     url: '/',
-                    data: {input: $scope.form},
+                    data: {
+                        input: $scope.form
+                    },
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }).then(function successCallback(response) {
+
+                    $scope.output = response.data.output;
+                    $scope.alerts.push(response.data.alert);
+                    pret = angular.element(document.querySelector('#output'));
+                    pret.html($scope.output);
+
+                });
+
+            };
+
+            $scope.publish = function() {
+                $scope.$watch('file', function() {
+                    var file = $scope.file;
+                    if (!file) {
+                        return;
+                    }
+                });
+                Upload.upload({
+                    method: 'POST',
+                    url: '/publish',
+                    data: {
+                        input: $scope.form
+                    },
                     file: $scope.file,
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
                 }).then(function successCallback(response) {
-                        
-                        $scope.output =response.data.output; 
-                        pret = angular.element(document.querySelector('#output'));
-                        pret.html($scope.output);
 
-                    });
+                    $scope.output = response.data.output;
+                    $scope.alerts.push(response.data.alert);
+                    pret = angular.element(document.querySelector('#output'));
+                    pret.html($scope.output);
 
-                // $http({
-                //     method: 'POST',
-                //     url: '/',
-                //     data: {file: $scope.file, input: $scope.form},
-                //     headers: {
-                //         'Content-Type': 'application/json'
-                //     }
-                // }).then(function successCallback(response) {
-                        
-                //         $scope.output =response.data.output; 
-                //         pret = angular.element(document.querySelector('#output'));
-                //         pret.html($scope.output);
-
-                //     });
-
-            };
-        
-            $scope.resetForm = function(form) {
-
-                  angular.copy({},form);
-                }
-                    
-            $scope.delForm = function(name) {
-                delete $scope.form[name];
+                });
             };
 
-        }]);     
-            
+            $scope.resetForm($scope.form);
+
+        }]);
+
         app.controller('cusSubs', function($scope) {
-            $scope.helpCmds = [];
-            $scope.instCmds = [];
-            $scope.uninstCmds = [];
-            $scope.preCmds = [];
-            $scope.poCmds = [];
 
-            $scope.helpRegs = [];
-            $scope.instRegs = [];
-            $scope.uninstRegs = [];
-            $scope.preRegs = [];
-            $scope.poRegs = [];
 
-            $scope.helpVals = [];
-
-            $scope.getSelect = function(id){
-                return $('#'+id).find(":selected").text();
+            $scope.getSelect = function(id) {
+                return $('#' + id).find(":selected").text();
             }
 
-
-             $scope.addCmd = function(sub) {
-                switch (sub){
-                    case 'help':
-                        $scope.helpCmds.push({
-                            text: "",
-                         });
-                    break;
-
-                    case 'install':
-                        $scope.instCmds.push({
-                            text: "",
-                        });
-                    break;
-
-                    case 'uninstall':
-                        $scope.uninstCmds.push({
-                            text: "",
-                        });
-                    break;
-
-                    case 'preinstall':
-                        $scope.preCmds.push({
-                            text: "",
-                        });
-                    break;
-
-                    case 'postinstall':
-                        $scope.poCmds.push({
-                            text: "",
-                        });
-                    break;
-                }
+            $scope.addCmd = function(sub) {
+                $scope.form.commands[sub].push({
+                    text: "",
+                });
 
             };
             $scope.delCmd = function(i, sub) {
-
-                switch (sub){
-                    case 'help':
-                        if (i >= 0) {
-                            $scope.helpCmds.splice(i, 1);
-                        }
-                    break;
-
-                    case 'install':
-                        if (i >= 0) {
-                            $scope.instCmds.splice(i, 1);
-                        }
-                    break;
-
-                    case 'uninstall':
-                        if (i >= 0) {
-                            $scope.uninstCmds.splice(i, 1);
-                        }
-                    break;
-
-                    case 'preinstall':
-                        if (i >= 0) {
-                            $scope.preCmds.splice(i, 1);
-                        }
-                    break;
-
-                    case 'postinstall':
-                        if (i >= 0) {
-                            $scope.poCmds.splice(i, 1);
-                        }
-                    break;
-                }
-
-            };              
+                $scope.form.commands[sub].splice(i, 1);
+            };
         });
     </script>
 
 </head>
 
-<body>
+<body ng-controller="formController">
 
     <div id="wrapper">
 
@@ -272,24 +261,11 @@
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i> <b class="caret"></b></a>
                     <ul class="dropdown-menu alert-dropdown">
-                        <li>
-                            <a href="#">Alert Name <span class="label label-default">Alert Badge</span></a>
-                        </li>
-                        <li>
-                            <a href="#">Alert Name <span class="label label-primary">Alert Badge</span></a>
-                        </li>
-                        <li>
-                            <a href="#">Alert Name <span class="label label-success">Alert Badge</span></a>
-                        </li>
-                        <li>
-                            <a href="#">Alert Name <span class="label label-info">Alert Badge</span></a>
-                        </li>
-                        <li>
-                            <a href="#">Alert Name <span class="label label-warning">Alert Badge</span></a>
-                        </li>
-                        <li>
-                            <a href="#">Alert Name <span class="label label-danger">Alert Badge</span></a>
-                        </li>
+                        <div ng-repeat="alert in alerts">
+                            <li>
+                                <div>{{alert.time}} <span class="label label-{{alert.type}}">{{alert.text}}</span></div>
+                            </li>     
+                        </div>
                         <li class="divider"></li>
                         <li>
                             <a href="#">View All</a>
@@ -341,7 +317,7 @@
                         </h1>
                         <ol class="breadcrumb">
                             <li>
-                                <i class="fa fa-dashboard"></i>  <a href="index.html">Home Page</a>
+                                <i class="fa fa-dashboard"></i> <a href="index.html">Home Page</a>
                             </li>
                             <li class="active">
                                 <i class="fa fa-edit"></i> Build Package
@@ -354,8 +330,8 @@
                 <div class="row">
                     <div class="col-lg-6">
 
-                        <form role="form" ng-controller="formController" ng-submit="submit()" >
-
+                        <form role="form"  ng-submit="submit()">
+                            
                             <div class="form-group">
                                 <label>Package Name</label>
                                 <input class="form-control" placeholder="Test Package 1.0" ng-model="form.packName">
@@ -373,203 +349,214 @@
 
                             <div class="form-group">
                                 <label>Software Version</label>
-                                <input class="form-control" placeholder="1_0" ng-model="form.softwareVer">
+                                <input class="form-control" placeholder="1.0" ng-model="form.softwareVer">
 
 
-                            <div class="form-group">
-                                <label>Comments</label>
-                                <textarea class="form-control" rows="3"></textarea>
-                            </div>
-
-                            <button type="button" class="btn btn-default" ngf-select ng-model="file">Data Files</button>
-
-                            <div class="form-group">
-                                <label>Mode</label>
-                                <select class="form-control">
-                                    <option>Development</option>
-                                    <option>Production</option>
-                                </select>
-                            </div>
-
-                            <div ng-controller="cusSubs" class="form-group">
-                                <label>Custom Subs</label>
-                                <div class="checkbox sub">
-                                    <label>
-                                        <input type="checkbox" ng-model="form.help"  ><b>Help</b>
-                                    </label>                                        
-                                    <button class="btn btn-xs btn-default" ng-click="addCmd('help')">Add Command</button>
-
-                                    <div ng-repeat="item in helpCmds">
-                                        <div style="font-weight:bold">Command: {{$index+1}}</div>
-                                       <input style="margin: 5px" class="form-control ng-pristine ng-valid" ng-model="form['helpCmd_'+$index]" type="text"><button class="btn btn-xs btn-default" ng-click="delCmd($index,'help');delForm('helpCmd_'+$index)">Delete</button>
-                                    </div>
-                            
+                                <div class="form-group">
+                                    <label>Comments</label>
+                                    <textarea class="form-control" rows="3" ng-model="form.comments"></textarea>
                                 </div>
-                                <div class="checkbox sub">
-                                    <label>
-                                        <input type="checkbox" ng-model="form.install"  ><b>Install</b>
-                                    </label>                                        
-                                    <button class="btn btn-xs btn-default" ng-click="addCmd('install')">Add Command</button>
-
-                                    <div ng-repeat="item in instCmds">
-                                        <div style="font-weight:bold">Command: {{$index+1}}</div>
-                                        <input style="margin: 5px" class="form-control ng-pristine ng-valid" ng-model="form['instCmd_'+$index]" type="text"><button class="btn btn-xs btn-default" ng-click="delCmd($index,'install');delForm('instCmd_'+$index)">Delete</button>
-                                    </div>
-
+                                <div class="form-group">
+                                    <button id="dataFiles" class="btn btn-default" ngf-select ngf-multiple="true" ng-model="file">Data Files</button>
                                 </div>
-                                <div class="checkbox sub">
-                                    <label>
-                                        <input type="checkbox" ng-model="form.uninstall"  ><b>Uninstall</b>
-                                    </label>                                        
-                                    <button class="btn btn-xs btn-default" ng-click="addCmd('uninstall')">Add Command</button>
-
-                                    <div ng-repeat="item in uninstCmds">
-                                        <input style="margin: 5px" class="form-control ng-pristine ng-valid" ng-model="form['uninstCmd_'+$index]" type="text"><button class="btn btn-xs btn-default" ng-click="delCmd($index,'uninstall');delForm('uninstCmd_'+$index)">Delete</button>
-                                    </div>
-
-                                </div>
-                                <div class="checkbox sub">
-                                    <label>
-                                        <input type="checkbox" ng-model="form.preinstall"  ><b>Preinstall</b>
-                                    </label>                                        
-                                    <button class="btn btn-xs btn-default" ng-click="addCmd('preinstall')">Add Command</button>
-
-                                    <div ng-repeat="item in preCmds">
-                                        <div style="font-weight:bold">Command: {{$index+1}}</div>
-                                        <input style="margin: 5px" class="form-control ng-pristine ng-valid" ng-model="form['preCmd_'+$index]" type="text"><button class="btn btn-xs btn-default" ng-click="delCmd($index,'preinstall');delForm('preCmd_'+$index)">Delete</button>
+                                <div class="form-group">
+                                    <div ng-repeat="item in file">
+                                        {{item.name}}
                                     </div>
                                 </div>
-                                <div class="checkbox sub">
-                                    <label>
-                                        <input  type="checkbox" ng-model="form.postinstall"  ><b>Postinstall</b>
-                                    </label>                                        
-                                    <button class="btn btn-xs btn-default" ng-click="addCmd('postinstall')">Add Command</button>
-                                    <div ng-repeat="item in poCmds">
-                                        <div style="font-weight:bold">Command: {{$index+1}}</div>
-                                        <input style="margin: 5px" class="form-control ng-pristine ng-valid" ng-model="form['poCmd_'+$index]" type="text"><button class="btn btn-xs btn-default" ng-click="delCmd($index,'postinstall');delForm('poCmd_'+$index)">Delete</button>
+                                <div class="dropdown form-group" sytle="margin: 5px">
+                                    <button class="btn btn-default" type="button" data-toggle="dropdown">{{getMode()}}
+                              <span class="caret"></span></button>
+                                    <ul class="dropdown-menu">
+                                        <li ng-click="changeMode('dev')"><a href="#">Development</a></li>
+                                        <li ng-click="changeMode('prod')"><a href="#">Production</a></li>
+                                    </ul>
+                                </div>
+
+                                <div ng-controller="cusSubs" class="form-group">
+                                    <label>Custom Subs</label>
+                                    <div class="checkbox sub">
+                                        <label>
+                                        <input type="checkbox" ng-model="form.subs.help"><b>Help</b>
+                                    </label>
+                                        <button class="btn btn-xs btn-default" ng-click="addCmd('help')">Add Command</button>
+
+                                        <div ng-repeat="item in form.commands.help">
+                                            <div style="font-weight:bold">Command: {{$index+1}}</div>
+                                            <input style="margin: 5px" class="form-control ng-pristine ng-valid" ng-model="form.commands.help[$index].text" type="text"><button class="btn btn-xs btn-default" ng-click="delCmd($index,'help')">Delete</button>
+                                        </div>
+
+                                    </div>
+                                    <div class="checkbox sub">
+                                        <label>
+                                        <input type="checkbox" ng-model="form.subs.install"  ><b>Install</b>
+                                    </label>
+                                        <button class="btn btn-xs btn-default" ng-click="addCmd('install')">Add Command</button>
+
+                                        <div ng-repeat="item in form.commands.install">
+                                            <div style="font-weight:bold">Command: {{$index+1}}</div>
+                                            <input style="margin: 5px" class="form-control ng-pristine ng-valid" ng-model="form.commands.install[$index].text" type="text"><button class="btn btn-xs btn-default" ng-click="delCmd($index,'install')">Delete</button>
+                                        </div>
+
+                                    </div>
+                                    <div class="checkbox sub">
+                                        <label>
+                                        <input type="checkbox" ng-model="form.subs.uninstall"  ><b>Uninstall</b>
+                                    </label>
+                                        <button class="btn btn-xs btn-default" ng-click="addCmd('uninstall')">Add Command</button>
+
+                                        <div ng-repeat="item in form.commands.uninstall">
+                                            <input style="margin: 5px" class="form-control ng-pristine ng-valid" ng-model="form.commands.uninstall[$index].text" type="text"><button class="btn btn-xs btn-default" ng-click="delCmd($index,'uninstall')">Delete</button>
+                                        </div>
+
+                                    </div>
+                                    <div class="checkbox sub">
+                                        <label>
+                                        <input type="checkbox" ng-model="form.subs.preinstall"  ><b>Preinstall</b>
+                                    </label>
+                                        <button class="btn btn-xs btn-default" ng-click="addCmd('preinstall')">Add Command</button>
+
+                                        <div ng-repeat="item in form.commands.preinstall">
+                                            <div style="font-weight:bold">Command: {{$index+1}}</div>
+                                            <input style="margin: 5px" class="form-control ng-pristine ng-valid" ng-model="form.commands.preinstall[$index].text" type="text"><button class="btn btn-xs btn-default" ng-click="delCmd($index,'preinstall')">Delete</button>
+                                        </div>
+                                    </div>
+                                    <div class="checkbox sub">
+                                        <label>
+                                        <input  type="checkbox" ng-model="form.subs.postinstall"  ><b>Postinstall</b>
+                                    </label>
+                                        <button class="btn btn-xs btn-default" ng-click="addCmd('postinstall')">Add Command</button>
+                                        <div ng-repeat="item in form.commands.postinstall">
+                                            <div style="font-weight:bold">Command: {{$index+1}}</div>
+                                            <input style="margin: 5px" class="form-control ng-pristine ng-valid" ng-model="form.commands.postinstall[$index].text" type="text"><button class="btn btn-xs btn-default" ng-click="delCmd($index,'postinstall')">Delete</button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="form-group">
-                                <label>Allowed Architecture</label>
-                                <label class="checkbox-inline">
-                                    <input type="checkbox" ng-model="form.arch32">32-Bit
+                                <div class="form-group">
+                                    <label>Allowed Architecture</label>
+                                    <label class="checkbox-inline">
+                                    <input type="checkbox" ng-model="form.archs.OSARCH_x32">32-Bit
                                 </label>
-                                <label class="checkbox-inline">
-                                    <input type="checkbox" ng-model="form.arch64">64-Bit
+                                    <label class="checkbox-inline">
+                                    <input type="checkbox" ng-model="form.archs.OSARCH_x64">64-Bit
                                 </label>
-                            </div>
+                                </div>
 
-                            <div class="form-group">
-                                <label>Allowed Regs</label>
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" ng-model="form.clc">CLC
+                                <div class="form-group">
+                                    <label>Allowed Regs</label>
+                                    <div class="checkbox">
+                                        <label>
+                                        <input type="checkbox" ng-model="form.regs.clc">CLC
                                     </label>
-                                </div>
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" ng-model="form.desktop">Desktop
+                                    </div>
+                                    <div class="checkbox">
+                                        <label>
+                                        <input type="checkbox" ng-model="form.regs.desktop">Desktop
                                     </label>
-                                </div>
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" ng-model="form.traveling">Traveling
+                                    </div>
+                                    <div class="checkbox">
+                                        <label>
+                                        <input type="checkbox" ng-model="form.regs.traveling">Traveling
                                     </label>
-                                </div>
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" ng-model="form.vClc">Virtual CLC
+                                    </div>
+                                    <div class="checkbox">
+                                        <label>
+                                        <input type="checkbox" ng-model="form.regs.virtual_clc">Virtual CLC
                                     </label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label>
+                                        <input type="checkbox" ng-model="form.regs.virtual_desktop">Virtual Desktop
+                                    </label>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="form-group">
-                                <label>Allowed Versions</label>
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" ng-model="form.xp32">Windows XP 32
+                                <div class="form-group">
+                                    <label>Allowed Versions</label>
+                                    <div class="checkbox">
+                                        <label>
+                                        <input type="checkbox" ng-model="form.vers.OSVER_XP_32">Windows XP 32
                                     </label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label>
+                                        <input type="checkbox" ng-model="form.vers.OSVER_VISTA_SP0">Windows Vista SP0
+                                    </label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label>
+                                        <input type="checkbox" ng-model="form.vers.OSVER_VISTA_SP1">Windows Vista SP1
+                                    </label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label>
+                                        <input type="checkbox" ng-model="form.vers.OSVER_VISTA_SP2">Windows Vista SP2
+                                    </label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label>
+                                        <input type="checkbox" ng-model="form.vers.OSVER_WIN7_SP0">Windows 7 SP0
+                                    </label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label>
+                                        <input type="checkbox" ng-model="form.vers.OSVER_WIN7_SP1">Windows 7 SP1
+                                    </label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label>
+                                        <input type="checkbox" ng-model="form.vers.OSVER_WIN8_SP0">Windows 8
+                                    </label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label>
+                                        <input type="checkbox" ng-model="form.vers.OSVER_WIN10_SP0">Windows 10 SP0
+                                    </label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <label>
+                                        <input type="checkbox" ng-model="form.vers.OSVER_WIN10_SP1">Windows 10 SP1
+                                    </label>
+                                    </div>
                                 </div>
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" ng-model="form.vista_0">Windows Vista SP0
-                                    </label>
-                                </div>
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" ng-model="form.vista_1">Windows Vista SP1
-                                    </label>
-                                </div>
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" ng-model="form.vista_2">Windows Vista SP2
-                                    </label>
-                                </div>
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" ng-model="form.win7_0">Windows 7 SP0
-                                    </label>
-                                </div>
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" ng-model="form.win7_1">Windows 7 SP1
-                                    </label>
-                                </div>
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" ng-model="form.win8">Windows 8
-                                    </label>
-                                </div>
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" ng-model="form.win10_0">Windows 10 SP0
-                                    </label>
-                                </div>
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" ng-model="form.win10_1">Windows 10 SP1
-                                    </label>
-                                </div>                                                                                                                               
-                            </div>
 
-                            <div style="margin-bottom:15px">
-                                <button type="submit" class="btn btn-default btn-lg" value="Submit">Submit</button>
-                                <button type="reset" class="btn btn-default btn-lg" ng-click="resetForm(form)">Reset</button>
-                            </div>
+                                <div style="margin-bottom:15px">
+                                    <button type="submit" class="btn btn-default btn-lg" value="Submit">Submit</button>
+                                    <button type="reset" class="btn btn-default btn-lg" ng-click="resetForm(form)">Reset</button>
+                                </div>
 
-                            <div class="form-group">
-                                <label>Package Template</label>
-                                <p class="form-control-static">
-                                    <textarea style="width:100%;height:1200px" id="output" class="prettyprint">
+                                <div class="form-group">
+                                    <label>Package Template</label>
+                                    <p class="form-control-static">
+                                        <textarea style="width:100%;height:1200px" id="output" class="prettyprint">
                                     </textarea>
-                                </p>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-default btn-lg" value="Submit">Publish</button>
+                                    </p>
+                                </div>
+
+                                <button ng-click="publish()" class="btn btn-default btn-lg">Publish</button>
 
                         </form>
 
+                        </div>
+
                     </div>
+                    <!-- /.row -->
 
                 </div>
-                <!-- /.row -->
+                <!-- /.container-fluid -->
 
             </div>
-            <!-- /.container-fluid -->
+            <!-- /#page-wrapper -->
 
         </div>
-        <!-- /#page-wrapper -->
+        <!-- /#wrapper -->
 
-    </div>
-    <!-- /#wrapper -->
+        <!-- jQuery -->
+        <script src="js/jquery.js"></script>
 
-    <!-- jQuery -->
-    <script src="js/jquery.js"></script>
-
-    <!-- Bootstrap Core JavaScript -->
-    <script src="js/bootstrap.min.js"></script>
+        <!-- Bootstrap Core JavaScript -->
+        <script src="js/bootstrap.min.js"></script>
 
 </body>
 
