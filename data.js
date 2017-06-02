@@ -56,7 +56,7 @@ class Template {
  
         this.data += this.im_includes = require('./defs/includes.js')();
 
-        this.data += this.getOpts = require('./defs/includes.js')(data.subs);
+        this.data += this.getOpts = require('./defs/args.js')(data.subs);
 
         for (var i = 0; i < data.subs.length; i++) {
             switch (data.subs[i]) {

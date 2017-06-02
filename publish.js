@@ -9,10 +9,10 @@ const fs = require("fs");
 
 function publish(data,mode,packId){
 	if(packId !== '.'){
-		var dir = initDir(PACK_LOC,mode,packId);
-		var file = initFile(dir,FILE_ROOT,FILE_EXT);
 
-		write(file,data);
+		var dir = initDir(PACK_LOC,mode,packId);
+		var file = initFile(dir,FILE_ROOT,FILE_EXT,data);
+
 		return dir;
 	}
 
@@ -58,24 +58,24 @@ function publish(data,mode,packId){
 		return undefined;
 	}
 
-	function initFile(dir,root,ext){
+	function initFile(dir,root,ext,data){
 		var logNum = 0;
 		while(fs.existsSync(dir+root+String(logNum)+ext))
 			logNum++;
-		fs.open(dir+root+String(logNum)+ext,'wx+',function(err,fd){
+		fileD = fs.open(dir+root+String(logNum)+ext,'wx+',function(err,fd){
 			if(err){
 				return console.log(err);
 			}
-			console.log("\nFILE " + dir+root+String(logNum)+ext +" CREATED\n");
+			else{		
+				fs.writeFileSync(dir+root+String(logNum)+ext,data)
+				console.log("\nFILE " + dir+root+String(logNum)+ext +" CREATED\n");
+				fs.close(fd);
+			}	
 		});
+
 		return dir+root+String(logNum)+ext;
 	}
 
-	function write(file,data){
-		fs.writeFileSync(file,
-			data
-		);
-	}
 }
 
 module.exports = function(data,mode,packId){

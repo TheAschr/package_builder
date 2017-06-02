@@ -37,7 +37,6 @@ var upload = multer({
 var data;
 var output;
 
-
 app.post('/', upload.none(), function(request, response) {
     
     console.log("Submit Request From: " + request.connection.remoteAddress);
@@ -104,7 +103,7 @@ app.post('/', upload.none(), function(request, response) {
         output = require("./gen.js")(data);
         return response.json({
             output: output,
-            alert: {type: 'success', time: date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() , text: "Submit Successful" }
+            alert: {type: 'success', time: date.getHours() + ":" + (date.getMinutes()<10?'0':'') + date.getMinutes() + ":" + (date.getSeconds()<10?'0':'') + date.getSeconds() , text: "Submit Successful" }
         });
 
     } else {
@@ -113,7 +112,7 @@ app.post('/', upload.none(), function(request, response) {
         }
       return response.json({
         output: output,
-        alert: {type: 'danger', time: date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() , text: "Submit Error" }
+        alert: {type: 'danger', time: date.getHours() + ":" + (date.getMinutes()<10?'0':'') + date.getMinutes() + ":" + (date.getSeconds()<10?'0':'') + date.getSeconds() , text: "Submit Failed" }
       });
     }
 
@@ -128,20 +127,31 @@ app.get('/', (request, response) => {
 
 function publishData(request, response, next) {
     console.log("Publish Request From: " + request.connection.remoteAddress);
+    var date = new Date();
 
 
-    if (typeof output !== '') {
+    if (typeof data !== 'undefined') {
         data_dir = require("./publish.js")(output, data.mode, data.packId);
         return next();
     } else {
-        console.log("ERROR: OUTPUT NOT DEFINED");
+      var error = "ERROR: PLEASE SUBMIT DATA BEFORE PUBLISHING";
+      return response.json({
+        output: error,
+        alert: {type: 'danger', time: date.getHours() + ":" + (date.getMinutes()<10?'0':'') + date.getMinutes() + ":" + (date.getSeconds()<10?'0':'') + date.getSeconds() , text: "Publish Failed" }
+      });
     }
+
+}
+
+function publishSuccess(request, response) {
+    var date = new Date();
     return response.json({
       output: output,
-      alert: {type: 'success', time: date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() , text: "Publish Error" }
+      alert: {type: 'success', time: date.getHours() + ":" + (date.getMinutes()<10?'0':'') + date.getMinutes() + ":" + date.getSeconds() , text: "Publish Successful" }
     });
 }
-app.post('/publish', publishData, upload.any());
+
+app.post('/publish', publishData, upload.any(),publishSuccess);
 
 
 

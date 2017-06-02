@@ -330,7 +330,7 @@
                 <div class="row">
                     <div class="col-lg-6">
 
-                        <form role="form"  ng-submit="submit()">
+                        <form role="form">
                             
                             <div class="form-group">
                                 <label>Package Name</label>
@@ -522,8 +522,9 @@
                                 </div>
 
                                 <div style="margin-bottom:15px">
-                                    <button type="submit" class="btn btn-default btn-lg" value="Submit">Submit</button>
+                                    <button type="submit" class="btn btn-default btn-lg" ng-click="submit()">Submit</button>
                                     <button type="reset" class="btn btn-default btn-lg" ng-click="resetForm(form)">Reset</button>
+                                    <button ng-click="publish()" class="btn btn-default btn-lg">Publish</button>
                                 </div>
 
                                 <div class="form-group">
@@ -533,8 +534,6 @@
                                     </textarea>
                                     </p>
                                 </div>
-
-                                <button ng-click="publish()" class="btn btn-default btn-lg">Publish</button>
 
                         </form>
 
